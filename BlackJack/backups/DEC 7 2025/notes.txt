@@ -1,6 +1,0 @@
-Dec 5, 2025
-Need a way to read handSize()
-Need a way to draw a new subsequent card. currently, due to the loop, it adds 2 cards on hit
-Need a way to display 2 starting cards for the player
-    - print the cards outside of the while loop?
-    - have the random card getting outside of the loop while only having HSD inside the loop?
