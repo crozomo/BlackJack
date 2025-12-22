@@ -21,3 +21,25 @@ Cards drawRandomCard(std::vector<Cards>& playingCards, std::mt19937& gen) {
 
     return selected;
 }
+
+// Print Game Board
+void printGameBoard(HandManager& dealer, HandManager& player, int money, int bet) {
+    std::cout << "<<<| DEALER MUST DRAW TO 17 |>>>" << "\n\n";
+    std::cout << "DEALER'S HAND:" << "\n";
+    dealer.printHand();
+    std::cout << " " << "\n\n";
+    std::cout << "Dealer Showing: ";
+    std::cout << dealer.getHandScore();
+    std::cout << "\n\n";
+
+    std::cout << "YOUR HAND:" << "\n";
+    player.printHand();
+    std::cout << " " << "\n\n";
+    std::cout << "Player Showing: ";
+    std::cout << player.getHandScore();
+    std::cout << "\n\n";
+
+    std::cout << "Bet Size: " << bet << "\n\n";
+    std::cout << "MONEY: " << money << "\n";
+
+}

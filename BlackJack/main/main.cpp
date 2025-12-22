@@ -20,13 +20,13 @@ int money {200}; // player starting funds
 // MENU INPUTS
 int select {}; // menu select
 int bet {}; // set bet size
-char confirmBetChoice{}; // confirm bet size
 char loopChoice {}; // used for exiting program
 
 // Menu Booleans
-bool keepGoing = true; // loops through entire program
+bool keepGoing {true}; // loops through entire program
 bool betMenu = (bet <= 0 || bet > money);
 bool initGame = true; // initial card deal
+bool moneyBetLoop {true}; // update player money and bet size during dealer actions and win/loss
 
 // GAME INPUTS
 int playerHSD {}; // hit/stand/double
@@ -36,13 +36,13 @@ std::random_device rd;
 std::mt19937 rng(rd());
 
 // ACTOR BOOL ACTIONS
-bool playerTurn = true;
-bool dealerTurn = true;
+bool playerTurn {true};
+bool dealerTurn {true};
 
 
 while (keepGoing) {
 system("cls");
-// Main Menu
+// Main Menu 
 std::cout << R"(
 ♠+===+===+===+===+===+===+♠
 |  ♠ ♥   BLACKJACK  ♣ ♦  |
@@ -50,17 +50,21 @@ std::cout << R"(
 
 )";
 
-std::cout << "MONEY: " << money << "\n";
+std::cout << "MONEY: " << money << "\n\n";
 
-if (money >= 1000) {
+if (money == 0 && money < 1) {
+    std::cout << "99% of Gamblers..." << "\n";
+}
+
+if (money >= 1000 && money < 5000) {
     std::cout << "Hey! Check Out the High-Roller!" << "\n";
 }
 
-if (money >= 5000) {
+if (money >= 5000 && money < 10000) {
     std::cout << "Whoa Buddy! Leave Some Chips for the Rest of Us!" << "\n";
 }
 
-if (money >= 10000) {
+if (money >= 10000 && money < 1000000) {
     std::cout << "You've Had Enough Fun, We're Going To Have to Ask You to Leave" << "\n";
 }
 
@@ -79,6 +83,7 @@ std::cout << R"(
 
 SELECT:
 )";
+
 std::cin >> select;
 
 // Deck Debug
@@ -181,7 +186,7 @@ player.clearHand();
 // Check remaining cards in deck - reset if <= 20 cards
 if (playingCards.size() <= 20) {
     std::cout << "SHUFFLING DECK..." << "\n";
-                for (int t = 1; t >= 0; t--){
+            for (int t {1}; t >= 0; t--) {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
     playingCards = generateDeck;
@@ -189,56 +194,41 @@ if (playingCards.size() <= 20) {
 
 // GAME START
 while (initGame) {
-std::cout << "<<<| DEALER MUST DRAW TO 17 |>>>" << "\n\n";
-// Dealer takes 1 random card, removes card from deck, displays card and value
-std::cout << "DEALER'S HAND:" << "\n";
-dealer.addCard(drawRandomCard(playingCards, rng));
-dealer.printHand();
-std::cout << " " << "\n\n";
-std::cout << "Dealer Showing: ";
-std::cout << dealer.getHandScore();
-std::cout << "\n\n";
-
-// Player takes 2 random cards, removing them from deck, display cards and value
-std::cout << "YOUR HAND:" << "\n";
-player.addCard(drawRandomCard(playingCards, rng));
-player.addCard(drawRandomCard(playingCards, rng));
-player.printHand();
-std::cout << " " << "\n\n";
-std::cout << "Player Showing: ";
-std::cout << player.getHandScore();
-std::cout << "\n\n";
-initGame = false;
-}
-
-//bool playerTurn = true;
-while (playerTurn) {
-system ("cls");
     std::cout << "<<<| DEALER MUST DRAW TO 17 |>>>" << "\n\n";
+// Dealer takes 1 random card, removes card from deck, displays card and value
     std::cout << "DEALER'S HAND:" << "\n";
-    dealer.printHand();
+        dealer.addCard(drawRandomCard(playingCards, rng));
+        dealer.printHand();
     std::cout << " " << "\n\n";
     std::cout << "Dealer Showing: ";
     std::cout << dealer.getHandScore();
     std::cout << "\n\n";
 
+// Player takes 2 random cards, removing them from deck, display cards and value
     std::cout << "YOUR HAND:" << "\n";
-    player.printHand();
+        player.addCard(drawRandomCard(playingCards, rng));
+        player.addCard(drawRandomCard(playingCards, rng));
+        player.printHand();
     std::cout << " " << "\n\n";
     std::cout << "Player Showing: ";
     std::cout << player.getHandScore();
     std::cout << "\n\n";
+        initGame = false;
+}
+
+//bool playerTurn = true;
+while (playerTurn) {
+    system ("cls");
+    printGameBoard(dealer, player, money, bet);
 
 // Player opens with BlackJack
     if (player.getHandScore() == 21) {
-        playerTurn = false;
         money = money + (bet * 3);
-        std::cout << "♠♠♠ <<< Player BlackJack! >>> ♠♠♠" << "\n\n";
+        std::cout << "\n" << "♠ ♠ ♠ <<< Player BlackJack! >>> ♠ ♠ ♠" << "\n";
+        std::cout << "YOU WON " << bet << "\n";
         std::cout << "Enter '1' to Continue...";
+        playerTurn = false;
         std::cin >> playerHSD;
-                /*for (int t = 1; t >= 0; t--){
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }*/
         break; // overwrites dealer actions
     }
   
@@ -250,12 +240,14 @@ player.printHandSize();
 std::cout << "deck size: " << playingCards.size() << "\n";
 std::cout << "-----------------" << "\n\n";
 */
-
+/*
 // Show Bet Size
 std::cout << "Bet Size: " << bet << "\n\n";
 
 // Player Actions
 std::cout << "MONEY: " << money << "\n";
+*/
+
 std::cout << R"(
 +------------+
 | 1. HIT     |
@@ -298,61 +290,43 @@ std::cin >> playerHSD;
 
 // DOUBLE
 // Add only 1 card, doubles bet. moves straight to dealer actions
+// fix being able to double with no money/not enough money
     else if (playerHSD == 3) {
         system ("cls");
-        std::cout << "<<<| DEALER MUST DRAW TO 17 |>>>" << "\n\n";
-        std::cout << "DEALER'S HAND:" << "\n";
-        dealer.printHand();
-        std::cout << " " << "\n\n";
-        std::cout << "Dealer Showing: ";
-        std::cout << dealer.getHandScore();
-        std::cout << "\n\n";
+        printGameBoard(dealer, player, money, bet);
 
-        std::cout << "YOUR HAND:" << "\n";
-        player.printHand();
-        std::cout << " " << "\n\n";
-        std::cout << "Player Showing: ";
-        std::cout << player.getHandScore();
-        std::cout << "\n\n";
-
-        player.addCard(drawRandomCard(playingCards, rng));
-        player.getHandScore();
-        bet = bet * 2; // doubles bet size
-                for (float t = 0.25; t >= 0; t--){
+// cout error message if doubling bet will lead to money > 0. 
+        if (money - bet * 2 <= 0) {
+            std::cout << "Error: Insufficient Funds!" << "\n" ;
+                for (int t {1}; t >= 0; t--){
                 std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
-        playerTurn = false;
-    
+                }
+        }
+
+        else {
+            player.addCard(drawRandomCard(playingCards, rng));
+            player.getHandScore();
+            bet = bet * 2; // doubles bet size
+                    for (int t {1}; t >= 0; t--){
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    }
+            playerTurn = false;
+        }
     } // DOUBLE BLOCK
 
     
 // Player Bust
     if (player.getHandScore() > 21) {
         system ("cls");
-        std::cout << "<<<| DEALER MUST DRAW TO 17 |>>>" << "\n\n";
-        std::cout << "DEALER'S HAND:" << "\n";
-        dealer.printHand();
-        std::cout << " " << "\n\n";
-        std::cout << "Dealer Showing: ";
-        std::cout << dealer.getHandScore();
-        std::cout << "\n\n";
-
-        std::cout << "YOUR HAND:" << "\n";
-        player.printHand();
-        std::cout << " " << "\n\n";
-        std::cout << "Player Showing: ";
-        std::cout << player.getHandScore();
-        std::cout << "\n\n";
+        printGameBoard(dealer, player, money, bet);
 
         std::cout << "<< BUST! >>" << "\n";
         money = money - bet;
-        std::cout << "<< YOU LOST " << bet << " >>" << "\n\n";
-        std::cout << "Enter '1' to Continue...";
+        system ("cls");
+        printGameBoard(dealer, player, money, bet);
+        std::cout << "\n" << "<< YOU LOST " << bet << " >>" << "\n\n";
+        std::cout << "Enter '1' to Continue..." << "\n";
         std::cin >> playerHSD;
-        /* 
-            for (int t = 1; t >= 0; t--){
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }*/
 
         playerTurn = false;
     }
@@ -360,30 +334,15 @@ std::cin >> playerHSD;
 // Player BlackJack
     if (player.getHandScore() == 21) {
         system ("cls");
-        std::cout << "<<<| DEALER MUST DRAW TO 17 |>>>" << "\n\n";
-        std::cout << "DEALER'S HAND:" << "\n";
-        dealer.printHand();
-        std::cout << " " << "\n\n";
-        std::cout << "Dealer Showing: ";
-        std::cout << dealer.getHandScore();
-        std::cout << "\n\n";
+        printGameBoard(dealer, player, money, bet);
 
-        std::cout << "YOUR HAND:" << "\n";
-        player.printHand();
-        std::cout << " " << "\n\n";
-        std::cout << "Player Showing: ";
-        std::cout << player.getHandScore();
-        std::cout << "\n\n";
-
-        money = money + (bet * 2);
-        std::cout << "*** <<< Black Jack! >>> ***" << "\n\n";
+        money = money + (bet * 2); 
+        system ("cls");
+        printGameBoard(dealer, player, money, bet);
+        std::cout << "\n" << "♠ ♠ ♠ <<< Player BlackJack! >>> ♠ ♠ ♠" << "\n\n";
         std::cout << "<< YOU WON " << bet << " >>" << "\n\n";
-        std::cout << "Enter '1' to Continue...";
+        std::cout << "Enter '1' to Continue..." << "\n";
         std::cin >> playerHSD;
-        /* 
-            for (int t = 1; t >= 0; t--){
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }*/
 
         playerTurn = false;
     }
@@ -391,7 +350,6 @@ std::cin >> playerHSD;
 } // playerTurn loop 
 
 // Dealer Actions
-
 // If Player Busts or Black Jack, skip Dealers Turn
 if (player.getHandScore() == 21 || player.getHandScore() > 21) {
     dealerTurn = false;
@@ -399,20 +357,7 @@ if (player.getHandScore() == 21 || player.getHandScore() > 21) {
 
 while (dealerTurn) {
     system ("cls");
-    std::cout << "<<<| DEALER MUST DRAW TO 17 |>>>" << "\n\n";
-    std::cout << "DEALER'S HAND:" << "\n";
-    dealer.printHand();
-    std::cout << " " << "\n\n";
-    std::cout << "Dealer Showing: ";
-    std::cout << dealer.getHandScore();
-    std::cout << "\n\n";
-
-    std::cout << "YOUR HAND:" << "\n";
-    player.printHand();
-    std::cout << " " << "\n\n";
-    std::cout << "Player Showing: ";
-    std::cout << player.getHandScore();
-    std::cout << "\n\n";
+    printGameBoard(dealer, player, money, bet);
 
 // Dealer soft stands on 17
     if (dealer.getHandScore() >= 17) {
@@ -434,66 +379,54 @@ while (dealerTurn) {
 // Dealer Bust 
     if (dealer.getHandScore() > 21) {
         money = money + bet;
-        std::cout << "<< Dealer Bust! >>" << "\n";
+        system ("cls");
+        printGameBoard(dealer, player, money, bet);
+        std::cout << "\n" << "<< Dealer Bust! >>" << "\n";
         std::cout << "<< YOU WON " << bet << " >>" << "\n\n";
-        std::cout << "Enter '1' to Continue...";
+        std::cout << "Enter '1' to Continue..." << "\n";
         std::cin >> playerHSD;
-        /* 
-            for (int t = 1; t >= 0; t--){
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }*/
     }
 
  // Dealer BlackJack
     if (dealer.getHandScore() == 21) {
         money = money - (bet * 1.5);
-        std::cout << "<< Dealer Black Jack! >>" << "\n";
+        system ("cls");
+        printGameBoard(dealer, player, money, bet);
+        std::cout << "\n" << "<< Dealer Black Jack! >>" << "\n";
         std::cout << "<< YOU LOST " << bet << " >>" << "\n\n";
-        std::cout << "Enter '1' to Continue...";
+        std::cout << "Enter '1' to Continue..." << "\n";
         std::cin >> playerHSD;
-        /* 
-            for (int t = 1; t >= 0; t--){
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }*/
     }
 
 // Player > Dealer
     if (dealer.getHandScore() >=17 && player.getHandScore() > dealer.getHandScore()
         && player.getHandScore() <= 21) {
         money = money + bet;
-        std::cout << "<< Player Wins! >>" << "\n";
+        system ("cls");
+        printGameBoard(dealer, player, money, bet);
+        std::cout << "\n" << "<< Player Wins! >>" << "\n";
         std::cout << "<< YOU WON " << bet << " >>" << "\n\n";
-        std::cout << "Enter '1' to Continue...";
+        std::cout << "Enter '1' to Continue..." << "\n";
         std::cin >> playerHSD;
-        /* 
-            for (int t = 1; t >= 0; t--){
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }*/
     }
 
 // Dealer > Player
     if (dealer.getHandScore() >=17 && player.getHandScore() < dealer.getHandScore()
         && dealer.getHandScore() < 21) {
         money = money - bet;
-        std::cout << "<< Dealer Wins! >>" << "\n";
+        system ("cls");
+        printGameBoard(dealer, player, money, bet);
+        std::cout << "\n" << "<< Dealer Wins! >>" << "\n";
         std::cout << "<< YOU LOST " << bet << " >>" << "\n\n";
-        std::cout << "Enter '1' to Continue...";
+        std::cout << "Enter '1' to Continue..." << "\n";
         std::cin >> playerHSD;
-        /* 
-            for (int t = 1; t >= 0; t--){
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }*/
     }
 
 // Player == Dealer (PUSH)
     if (dealer.getHandScore() >=17 && player.getHandScore() == dealer.getHandScore()) {
-        std::cout << "<< PUSH >>" << "\n\n";
+        std::cout << "\n" << "<< PUSH >>" << "\n\n";
         std::cout << "Enter '1' to Continue..." << "\n\n";
         std::cin >> playerHSD;
-        /* 
-            for (int t = 1; t >= 0; t--){
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }*/
     }
 
 } // Game Block
@@ -700,7 +633,7 @@ if (select == 3) {
             }
         std::cout << "           +-----+ << YOU'LL BE BACK >> +-----+\n";
 
-        for (int t = 3; t >= 0; t--){
+        for (int t {3}; t >= 0; t--){
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 

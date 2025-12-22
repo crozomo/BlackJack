@@ -60,5 +60,6 @@ class HandManager {
 
 };
 
+void printGameBoard(HandManager& dealer, HandManager& player, int money, int bet);
 
 #endif
